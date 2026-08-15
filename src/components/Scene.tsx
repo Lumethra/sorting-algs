@@ -17,8 +17,7 @@ function Box({ position, scale }: IBoxProps) {
     useFrame((_, delta) => {
         if (!mesh.current) return
 
-        const currentX = mesh.current.position.x
-        const distance = position - currentX
+        const distance = position - mesh.current.position.x
 
         mesh.current.position.x += distance * delta * 5
     })

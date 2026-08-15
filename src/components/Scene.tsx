@@ -55,7 +55,7 @@ export default function Scene() {
             >
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-                <group position={[-2.2, -2, 0]}>
+                <group position={[-2.2, -2.5, 0]}>
                     <Box position={0} scale={1} />
                     <Box position={1.1} scale={2} />
                     <Box position={2.2} scale={3} />

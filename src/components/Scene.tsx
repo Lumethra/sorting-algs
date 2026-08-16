@@ -63,7 +63,7 @@ export default function Scene() {
             >
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-                <group position={[-(numbers.length / 2 - 0.27), -(numbers.length / 2), 0]}>
+                <group position={[-(numbers.length / 2 - 0.235), -(numbers.length / 2), 0]}>
                     {numbers.map((value, index) => {
                         return (
                             <Box key={index} position={(index * 1.1)} scale={value} />

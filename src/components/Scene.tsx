@@ -11,18 +11,37 @@ interface IBoxProps {
     scale: number;
 }
 
-
 export default function Scene() {
     const [numbers, setNumbers] = useState([2, 6, 3, 4, 5, 1, 7])
 
     const sort = () => {
-        setNumbers([1, 2, 3, 4, 5, 6]);
+        bubbleSort();
     }
 
     const shuffle = () => {
         setNumbers(numbers.map(() => Math.floor((Math.random() * 7 + 1) * 100) / 100));
 
         // console.log(Math.floor((Math.random() * 8 + 1) * 100) / 100)
+    }
+
+    const delay = (time: any) => new Promise<void>((resolve) => setTimeout(resolve, time))
+
+    async function bubbleSort() {
+        let swapped = false;
+        let numbersCache = [...numbers];
+
+        for (let i = 0; i < numbersCache.length - 1; i++) {
+            swapped = false;
+            for (let j = 0; j < numbersCache.length - i - 1; j++) {
+                if (numbersCache[j] > numbersCache[j + 1]) {
+                    [numbersCache[j], numbersCache[j + 1]] = [numbersCache[j + 1], numbersCache[j]];
+                    setNumbers([...numbersCache]);
+                    swapped = true;
+                    await delay(500);
+                }
+            }
+            if (!swapped) break;
+        }
     }
 
     function Box({ position, scale }: IBoxProps) {

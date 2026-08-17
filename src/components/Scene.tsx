@@ -2,17 +2,19 @@
 // https://threejsresources.com/frameworks/three-js-nextjs
 // https://r3f.docs.pmnd.rs/getting-started/introduction
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 
 interface IBoxProps {
     position: number;
+    lastPos: any;
     scale: number;
 }
 
 export default function Scene() {
     const [numbers, setNumbers] = useState([2, 6, 3, 4, 5, 1, 7])
+    const [lastNum, setLastNum] = useState([2, 6, 3, 4, 5, 1, 7])
 
     const sort = () => {
         bubbleSort();
@@ -24,6 +26,11 @@ export default function Scene() {
         // console.log(Math.floor((Math.random() * 8 + 1) * 100) / 100)
     }
 
+    // useEffect(() => {
+    //     console.log("Numbers updated to:", numbers);
+    //     console.log("last Numbers updated to:", lastNum);
+    // }, [numbers]);
+
     const delay = (time: any) => new Promise<void>((resolve) => setTimeout(resolve, time))
 
     async function bubbleSort() {
@@ -34,17 +41,18 @@ export default function Scene() {
             swapped = false;
             for (let j = 0; j < numbersCache.length - i - 1; j++) {
                 if (numbersCache[j] > numbersCache[j + 1]) {
+                    setLastNum([...numbersCache]);
                     [numbersCache[j], numbersCache[j + 1]] = [numbersCache[j + 1], numbersCache[j]];
                     setNumbers([...numbersCache]);
                     swapped = true;
-                    await delay(500);
+                    await delay(800);
                 }
             }
             if (!swapped) break;
         }
     }
 
-    function Box({ position, scale }: IBoxProps) {
+    function Box({ position, lastPos, scale }: IBoxProps) {
         const mesh = useRef<any>(null)
 
         useFrame((_, delta) => {
@@ -58,7 +66,7 @@ export default function Scene() {
             <group>
                 <mesh
                     ref={mesh}
-                    position={[0, scale / 2, 0]}
+                    position={[lastPos, scale / 2, 0]}
                     scale={[1, scale, 1]}
                 >
                     <boxGeometry />
@@ -85,7 +93,7 @@ export default function Scene() {
                 <group position={[-(numbers.length / 2 - 0.235), -(numbers.length / 2), 0]}> {/*ahhhhhhhhhhhhh hardcoded value of 0.235*/}
                     {numbers.map((value, index) => {
                         return (
-                            <Box key={index} position={(index * 1.1)} scale={value} />
+                            <Box key={index} position={(index * 1.1)} lastPos={(lastNum.findIndex(element => element === value)) * 1.1} scale={value} />
                         )
                     })}
                 </group>

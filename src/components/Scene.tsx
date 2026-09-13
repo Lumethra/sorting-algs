@@ -11,22 +11,27 @@ interface IBoxProps {
     lastPos: any;
     scale: number;
     isSwapping: boolean;
+    isChosen: boolean;
+    isFinish: boolean;
 }
 
 export default function Scene() {
     const [numbers, setNumbers] = useState([2, 6, 3, 4, 5, 1, 7])
     const [lastNum, setLastNum] = useState([2, 6, 3, 4, 5, 1, 7])
     const [swappedNum, setSwappedNum] = useState<number[]>([]) //https://stackoverflow.com/questions/53650468/set-types-on-usestate-react-hook-with-typescript
+    const [chosenNum, setChosenNum] = useState<number>();
+    const [finishNum, setFinishNum] = useState<number>();
 
     const sort = () => {
-        //bubbleSort();
-        selectionSort();
+        // bubbleSort();
+        // selectionSort();
+        insertionSort();
     }
 
     const shuffle = () => {
-        setNumbers(numbers.map(() => Math.floor((Math.random() * 7 + 1) * 100) / 100));
+        setNumbers(numbers.map(() => Math.floor((Math.random() * 7 + 1) * 10) / 10));
 
-        // console.log(Math.floor((Math.random() * 8 + 1) * 100) / 100)
+        // console.log(Math.floor((Math.random() * 7 + 1) * 10) / 10)
     }
 
     // useEffect(() => {
@@ -45,7 +50,7 @@ export default function Scene() {
             for (let j = 0; j < numbersCache.length - i - 1; j++) {
                 if (numbersCache[j] > numbersCache[j + 1]) {
                     setLastNum([...numbersCache]);
-                    setSwappedNum([numbersCache[j], numbersCache[j + 1]]);
+                    setChosenNum(j + 1);
                     [numbersCache[j], numbersCache[j + 1]] = [numbersCache[j + 1], numbersCache[j]];
                     setNumbers([...numbersCache]);
                     swapped = true;
@@ -56,7 +61,8 @@ export default function Scene() {
         }
         await delay(400);
         setLastNum([...numbersCache]);
-        setSwappedNum([]);
+        setChosenNum(numbersCache.length);
+        finishedSort();
     }
 
     async function selectionSort() {
@@ -82,9 +88,42 @@ export default function Scene() {
         await delay(400);
         setLastNum([...numbersCache]);
         setSwappedNum([]);
+        finishedSort();
     }
 
-    function Box({ position, lastPos, scale, isSwapping }: IBoxProps) {
+    async function insertionSort() {
+        let numbersCache = [...numbers];
+
+        for (let i = 0; i <= numbersCache.length - 1; i++) {
+            for (let j = i; j > 0; j--) {
+                if (numbersCache[j] < numbersCache[j - 1]) {
+                    setLastNum([...numbersCache]);
+                    setChosenNum(j - 1);
+                    [numbersCache[j], numbersCache[j - 1]] = [numbersCache[j - 1], numbersCache[j]];
+                    setNumbers([...numbersCache]);
+                    await delay(800);
+                } else {
+                    break;
+                }
+            }
+        }
+        await delay(500);
+        setLastNum([...numbersCache]);
+        setChosenNum(numbersCache.length);
+        finishedSort(); // inspired by https://sortvisualizer.com/insertionsort/
+    }
+
+    async function finishedSort() {
+        let numbersCache = [...numbers];
+
+        for (let i = 0; i <= numbersCache.length - 1; i++) {
+            setFinishNum(i);
+            await delay(200);
+        }
+        setFinishNum(numbersCache.length);
+    }
+
+    function Box({ position, lastPos, scale, isSwapping, isChosen, isFinish }: IBoxProps) {
         const mesh = useRef<any>(null)
 
         useFrame((_, delta) => {
@@ -99,10 +138,10 @@ export default function Scene() {
                 <mesh
                     ref={mesh}
                     position={[lastPos, scale / 2, 0]}
-                    scale={[1, scale, isSwapping ? 1.1 : 1]}
+                    scale={[1, scale, isChosen || isSwapping ? 1.001 : 1]}
                 >
                     <boxGeometry />
-                    <meshStandardMaterial color={isSwapping ? "#97e5e8" : "white"} />
+                    <meshStandardMaterial color={isFinish ? "#6cd4af" : isChosen || isSwapping ? "#97e5e8" : "white"} />
                 </mesh>
             </group>
         )
@@ -125,8 +164,10 @@ export default function Scene() {
                 <group position={[-(numbers.length / 2 - 0.235), -(numbers.length / 2), 0]}> {/*ahhhhhhhhhhhhh hardcoded value of 0.235*/}
                     {numbers.map((value, index) => {
                         const isSwappedNum = swappedNum.includes(value);
+                        const isfinishNum = finishNum == index;
+                        const isChosenNum = chosenNum == index;
                         return (
-                            <Box key={index} position={(index * 1.1)} lastPos={(lastNum.findIndex(element => element === value)) * 1.1} scale={value} isSwapping={isSwappedNum} />
+                            <Box key={index} position={(index * 1.1)} lastPos={(lastNum.findIndex(element => element === value)) * 1.1} scale={value} isSwapping={isSwappedNum} isChosen={isChosenNum} isFinish={isfinishNum} />
                         )
                     })}
                 </group>

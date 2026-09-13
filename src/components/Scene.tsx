@@ -10,14 +10,17 @@ interface IBoxProps {
     position: number;
     lastPos: any;
     scale: number;
+    isSwapping: boolean;
 }
 
 export default function Scene() {
     const [numbers, setNumbers] = useState([2, 6, 3, 4, 5, 1, 7])
     const [lastNum, setLastNum] = useState([2, 6, 3, 4, 5, 1, 7])
+    const [swappedNum, setSwappedNum] = useState<number[]>([]) //https://stackoverflow.com/questions/53650468/set-types-on-usestate-react-hook-with-typescript
 
     const sort = () => {
-        bubbleSort();
+        //bubbleSort();
+        selectionSort();
     }
 
     const shuffle = () => {
@@ -42,6 +45,7 @@ export default function Scene() {
             for (let j = 0; j < numbersCache.length - i - 1; j++) {
                 if (numbersCache[j] > numbersCache[j + 1]) {
                     setLastNum([...numbersCache]);
+                    setSwappedNum([numbersCache[j], numbersCache[j + 1]]);
                     [numbersCache[j], numbersCache[j + 1]] = [numbersCache[j + 1], numbersCache[j]];
                     setNumbers([...numbersCache]);
                     swapped = true;
@@ -50,9 +54,37 @@ export default function Scene() {
             }
             if (!swapped) break;
         }
+        await delay(400);
+        setLastNum([...numbersCache]);
+        setSwappedNum([]);
     }
 
-    function Box({ position, lastPos, scale }: IBoxProps) {
+    async function selectionSort() {
+        let numbersCache = [...numbers];
+
+        for (let i = 0; i < numbersCache.length - 1; i++) {
+            let smallestNumIndex = i;
+
+            for (let j = i + 1; j <= numbersCache.length - 1; j++) {
+                if (numbersCache[j] < numbersCache[smallestNumIndex]) {
+                    smallestNumIndex = j;
+                }
+            }
+
+            if (smallestNumIndex !== i) {
+                setLastNum([...numbersCache]);
+                setSwappedNum([numbersCache[i], numbersCache[smallestNumIndex]]);
+                [numbersCache[i], numbersCache[smallestNumIndex]] = [numbersCache[smallestNumIndex], numbersCache[i]];
+                setNumbers([...numbersCache]);
+                await delay(800);
+            }
+        }
+        await delay(400);
+        setLastNum([...numbersCache]);
+        setSwappedNum([]);
+    }
+
+    function Box({ position, lastPos, scale, isSwapping }: IBoxProps) {
         const mesh = useRef<any>(null)
 
         useFrame((_, delta) => {
@@ -67,10 +99,10 @@ export default function Scene() {
                 <mesh
                     ref={mesh}
                     position={[lastPos, scale / 2, 0]}
-                    scale={[1, scale, 1]}
+                    scale={[1, scale, isSwapping ? 1.1 : 1]}
                 >
                     <boxGeometry />
-                    <meshStandardMaterial />
+                    <meshStandardMaterial color={isSwapping ? "#97e5e8" : "white"} />
                 </mesh>
             </group>
         )
@@ -92,8 +124,9 @@ export default function Scene() {
                 <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
                 <group position={[-(numbers.length / 2 - 0.235), -(numbers.length / 2), 0]}> {/*ahhhhhhhhhhhhh hardcoded value of 0.235*/}
                     {numbers.map((value, index) => {
+                        const isSwappedNum = swappedNum.includes(value);
                         return (
-                            <Box key={index} position={(index * 1.1)} lastPos={(lastNum.findIndex(element => element === value)) * 1.1} scale={value} />
+                            <Box key={index} position={(index * 1.1)} lastPos={(lastNum.findIndex(element => element === value)) * 1.1} scale={value} isSwapping={isSwappedNum} />
                         )
                     })}
                 </group>

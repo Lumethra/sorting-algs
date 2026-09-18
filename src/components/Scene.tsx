@@ -25,31 +25,34 @@ export default function Scene() {
     const [shuffling, setShuffling] = useState<boolean>(false);
 
     const sort = () => {
+        if (shuffling) return
         // bubbleSort();
         // selectionSort();
         insertionSort();
     }
 
     const shuffle = async () => {
+        if (shuffling) return
         // setNumbers(numbers.map(() => Math.floor((Math.random() * 7 + 1) * 10) / 10));
 
         // console.log(Math.floor(Math.random() * 7 + 1));
 
         let numbersCache = [...numbers];
         let randomPos = Math.floor(Math.random() * 7);
-        let lastRPos = randomPos;
 
         setShuffling(true);
-        for (let i = 0; i < numbersCache.length; i++) {
-            setLastNum([...numbersCache]);
-            while (randomPos == lastRPos) {
-                randomPos = Math.floor(Math.random() * 7);
+        for (let i = 1; i <= 2; i++) {
+            for (let i = 0; i < numbersCache.length; i++) {
+                setLastNum([...numbersCache]);
+                while (randomPos == i) {
+                    randomPos = Math.floor(Math.random() * 7);
+                }
+                setSwappedNum([numbersCache[i], numbersCache[randomPos]]);
+                [numbersCache[i], numbersCache[randomPos]] = [numbersCache[randomPos], numbersCache[i]];
+                setNumbers([...numbersCache]);
+                await delay(500);
             }
-            lastRPos = randomPos;
-            setSwappedNum([numbersCache[i], numbersCache[randomPos]]);
-            [numbersCache[i], numbersCache[randomPos]] = [numbersCache[randomPos], numbersCache[i]];
-            setNumbers([...numbersCache]);
-            await delay(600);
+            if (numbersCache.length > 10) break;
         }
         await delay(400);
         setSwappedNum([]);

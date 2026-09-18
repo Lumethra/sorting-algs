@@ -3,7 +3,7 @@
 // https://r3f.docs.pmnd.rs/getting-started/introduction
 
 import { useState, useRef, useEffect } from "react"
-import { Canvas, useFrame } from "@react-three/fiber"
+import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 
 interface IBoxProps {
@@ -39,14 +39,18 @@ export default function Scene() {
 
         let numbersCache = [...numbers];
         let randomPos = Math.floor(Math.random() * 7);
+        let lastRPos = randomPos;
 
         setShuffling(true);
         for (let i = 1; i <= 2; i++) {
             for (let i = 0; i < numbersCache.length; i++) {
                 setLastNum([...numbersCache]);
-                while (randomPos == i) {
-                    randomPos = Math.floor(Math.random() * 7);
+                while (randomPos == lastRPos || randomPos == i) {
+                    randomPos = Math.floor(Math.random() * numbersCache.length);
                 }
+                console.log(randomPos)
+                console.log(lastRPos)
+                lastRPos = randomPos;
                 setSwappedNum([numbersCache[i], numbersCache[randomPos]]);
                 [numbersCache[i], numbersCache[randomPos]] = [numbersCache[randomPos], numbersCache[i]];
                 setNumbers([...numbersCache]);
@@ -58,6 +62,31 @@ export default function Scene() {
         setSwappedNum([]);
         setLastNum([...numbersCache]);
         setShuffling(false);
+    }
+
+    const add = () => {
+        let numbersCache = [...numbers];
+
+        numbersCache.sort(function (a, b) {                     // https://stackoverflow.com/questions/1063007/how-can-i-sort-an-array-of-integers
+            return a - b;
+        });
+
+        numbersCache[numbersCache.length] = numbersCache.length + 1;
+        setNumbers([...numbersCache]);
+        setLastNum([...numbersCache]);
+    }
+
+    const remove = () => {
+        let numbersCache = [...numbers];
+        if (numbersCache.length <= 2) return;
+
+        numbersCache.sort(function (a, b) {                     // https://stackoverflow.com/questions/1063007/how-can-i-sort-an-array-of-integers
+            return a - b;
+        });
+
+        numbersCache.splice(numbersCache.length - 1, 1);
+        setNumbers([...numbersCache]);
+        setLastNum([...numbersCache]);
     }
 
     // useEffect(() => {
@@ -87,7 +116,7 @@ export default function Scene() {
         }
         await delay(400);
         setLastNum([...numbersCache]);
-        setChosenNum(numbersCache.length);
+        setChosenNum(-1);
         finishedSort();
     }
 
@@ -135,7 +164,7 @@ export default function Scene() {
         }
         await delay(500);
         setLastNum([...numbersCache]);
-        setChosenNum(numbersCache.length);
+        setChosenNum(-1);
         finishedSort(); // inspired by https://sortvisualizer.com/insertionsort/
     }
 
@@ -146,18 +175,40 @@ export default function Scene() {
             setFinishNum(i);
             await delay(200);
         }
-        setFinishNum(numbersCache.length);
+        setFinishNum(-1);
     }
+
+    // function updateCam() {                          // https://discourse.threejs.org/t/using-r3f-to-update-camera-rotation-lookat-value/67734
+    //     const { camera } = useThree();
+
+    //     useEffect(() => {
+    //         if (!camera) return
+
+    //         camera.position.z = numbers.length * 2
+
+    //         camera.updateProjectionMatrix()
+    //     }, [numbers.length, camera])
+    // }
 
     function Box({ position, lastPos, scale, isSwapping, isChosen, isFinish, isShuffling }: IBoxProps) {
         const mesh = useRef<any>(null)
 
-        useFrame((_, delta) => {
+        useFrame((state, delta) => {
             if (!mesh.current) return
 
             const distance = position - mesh.current.position.x
 
-            mesh.current.position.x += distance * delta * 5
+            mesh.current.position.x += distance * delta * 4
+
+            // https://r3f.docs.pmnd.rs/api/hooks#selector
+            if (numbers.length > 7) {
+                state.camera.position.z += (numbers.length * 2 - state.camera.position.z /* oh god was that painful */) * delta * (3 /*slower?*/) // like above?
+                state.camera.position.y += ((numbers.length - (numbers.length * (1 / 6))) - state.camera.position.y) * delta * 3
+            } else {
+                state.camera.position.z == 15;
+                state.camera.position.y == 5;
+            }
+            state.camera.lookAt(0, 0, 0);
         })
         return (
             <group>
@@ -178,16 +229,19 @@ export default function Scene() {
             <div style={{ position: "absolute", top: 20, left: 20, zIndex: 10, display: "flex", gap: "10px" }}>
                 <button onClick={sort} style={{ padding: "10px", cursor: "pointer" }}>Sort</button>
                 <button onClick={shuffle} style={{ padding: "10px", cursor: "pointer" }}>Shuffle</button>
+                <button onClick={add} style={{ padding: "10px", cursor: "pointer" }}>Add Number</button>
+                <button onClick={remove} style={{ padding: "10px", cursor: "pointer" }}>Remove Number</button>
             </div>
 
             <Canvas
                 fallback={<div>Hehe, ur browser is trash</div>}
-                camera={{ fov: 50, near: 2, far: 1000, position: [0, 5, 15] }}
+                camera={{ fov: 50, near: 2, far: 1000, position: [0, 5, numbers.length * 2] }}
                 shadows={true}
             >
                 <ambientLight intensity={0.5} />
+
                 <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-                <group position={[-(numbers.length / 2 - 0.235), -(numbers.length / 2), 0]}> {/*ahhhhhhhhhhhhh hardcoded value of 0.235*/}
+                <group position={[-(numbers.length / 2), -(numbers.length / 2), 0]}> {/*ahhhhhhhhhhhhh hardcoded value of 0.235*/}
                     {numbers.map((value, index) => {
                         const isSwappedNum = swappedNum.includes(value);
                         const isfinishNum = finishNum == index;

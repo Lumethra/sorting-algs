@@ -13,6 +13,7 @@ interface IBoxProps {
     isSwapping: boolean;
     isChosen: boolean;
     isFinish: boolean;
+    isShuffling: boolean;
 }
 
 export default function Scene() {
@@ -21,6 +22,7 @@ export default function Scene() {
     const [swappedNum, setSwappedNum] = useState<number[]>([]) //https://stackoverflow.com/questions/53650468/set-types-on-usestate-react-hook-with-typescript
     const [chosenNum, setChosenNum] = useState<number>();
     const [finishNum, setFinishNum] = useState<number>();
+    const [shuffling, setShuffling] = useState<boolean>(false);
 
     const sort = () => {
         // bubbleSort();
@@ -28,10 +30,31 @@ export default function Scene() {
         insertionSort();
     }
 
-    const shuffle = () => {
-        setNumbers(numbers.map(() => Math.floor((Math.random() * 7 + 1) * 10) / 10));
+    const shuffle = async () => {
+        // setNumbers(numbers.map(() => Math.floor((Math.random() * 7 + 1) * 10) / 10));
 
-        // console.log(Math.floor((Math.random() * 7 + 1) * 10) / 10)
+        // console.log(Math.floor(Math.random() * 7 + 1));
+
+        let numbersCache = [...numbers];
+        let randomPos = Math.floor(Math.random() * 7);
+        let lastRPos = randomPos;
+
+        setShuffling(true);
+        for (let i = 0; i < numbersCache.length; i++) {
+            setLastNum([...numbersCache]);
+            while (randomPos == lastRPos) {
+                randomPos = Math.floor(Math.random() * 7);
+            }
+            lastRPos = randomPos;
+            setSwappedNum([numbersCache[i], numbersCache[randomPos]]);
+            [numbersCache[i], numbersCache[randomPos]] = [numbersCache[randomPos], numbersCache[i]];
+            setNumbers([...numbersCache]);
+            await delay(600);
+        }
+        await delay(400);
+        setSwappedNum([]);
+        setLastNum([...numbersCache]);
+        setShuffling(false);
     }
 
     // useEffect(() => {
@@ -123,7 +146,7 @@ export default function Scene() {
         setFinishNum(numbersCache.length);
     }
 
-    function Box({ position, lastPos, scale, isSwapping, isChosen, isFinish }: IBoxProps) {
+    function Box({ position, lastPos, scale, isSwapping, isChosen, isFinish, isShuffling }: IBoxProps) {
         const mesh = useRef<any>(null)
 
         useFrame((_, delta) => {
@@ -141,14 +164,14 @@ export default function Scene() {
                     scale={[1, scale, isChosen || isSwapping ? 1.001 : 1]}
                 >
                     <boxGeometry />
-                    <meshStandardMaterial color={isFinish ? "#6cd4af" : isChosen || isSwapping ? "#97e5e8" : "white"} />
+                    <meshStandardMaterial color={isFinish ? "#6cd4af" : isChosen || isSwapping ? isShuffling ? "#cb8b82" : "#97e5e8" : "white"} />
                 </mesh>
             </group>
         )
     }
 
     return (
-        <div style={{ width: "100vw", height: "100vh" }}>
+        <div style={{ width: "100vw", height: "100vh", background: "black" }}>
             <div style={{ position: "absolute", top: 20, left: 20, zIndex: 10, display: "flex", gap: "10px" }}>
                 <button onClick={sort} style={{ padding: "10px", cursor: "pointer" }}>Sort</button>
                 <button onClick={shuffle} style={{ padding: "10px", cursor: "pointer" }}>Shuffle</button>
@@ -167,7 +190,7 @@ export default function Scene() {
                         const isfinishNum = finishNum == index;
                         const isChosenNum = chosenNum == index;
                         return (
-                            <Box key={index} position={(index * 1.1)} lastPos={(lastNum.findIndex(element => element === value)) * 1.1} scale={value} isSwapping={isSwappedNum} isChosen={isChosenNum} isFinish={isfinishNum} />
+                            <Box key={index} position={(index * 1.1)} lastPos={(lastNum.findIndex(element => element === value)) * 1.1} scale={value} isSwapping={isSwappedNum} isChosen={isChosenNum} isFinish={isfinishNum} isShuffling={shuffling} />
                         )
                     })}
                 </group>

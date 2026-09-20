@@ -23,6 +23,10 @@ export default function Scene() {
     const [chosenNum, setChosenNum] = useState<number>();
     const [finishNum, setFinishNum] = useState<number>();
     const [shuffling, setShuffling] = useState<boolean>(false);
+    const [sortingSpeed, setSortingSpeed] = useState<number>(800)
+    const [shufflingSpeed, setShufflingSpeed] = useState<number>(600)
+
+    const valueSlider = useRef<HTMLInputElement>(null)
 
     const sort = () => {
         if (shuffling) return
@@ -48,13 +52,13 @@ export default function Scene() {
                 while (randomPos == lastRPos || randomPos == i) {
                     randomPos = Math.floor(Math.random() * numbersCache.length);
                 }
-                console.log(randomPos)
-                console.log(lastRPos)
+                // console.log(randomPos)
+                // console.log(lastRPos)
                 lastRPos = randomPos;
                 setSwappedNum([numbersCache[i], numbersCache[randomPos]]);
                 [numbersCache[i], numbersCache[randomPos]] = [numbersCache[randomPos], numbersCache[i]];
                 setNumbers([...numbersCache]);
-                await delay(500);
+                await delay(shufflingSpeed);
             }
             if (numbersCache.length > 10) break;
         }
@@ -84,9 +88,43 @@ export default function Scene() {
             return a - b;
         });
 
-        numbersCache.splice(numbersCache.length - 1, 1);
+        numbersCache.splice(numbersCache.length - 1, 1);        // https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array-in-javascript
         setNumbers([...numbersCache]);
         setLastNum([...numbersCache]);
+    }
+
+    const updateValue = (sliderValue: number) => {
+        if (!sliderValue) return
+        let numbersCache = [...numbers];
+
+        numbersCache.sort(function (a, b) {
+            return a - b;
+        });
+
+        if (numbers.length < sliderValue) {
+            // console.log(sliderValue);
+            for (let i = sliderValue; i > numbers.length; i--) {
+                numbersCache.push(numbersCache.length + 1);
+            }
+        } else if (numbers.length > sliderValue) {
+            // console.log(sliderValue)
+            for (let i = sliderValue; i < numbers.length; i++) {
+                numbersCache.splice(numbersCache.length - 1, 1);
+            }
+        }
+
+        setNumbers([...numbersCache]);
+        setLastNum([...numbersCache]);
+
+        // if (numbers.length < Number(valueSlider.current?.value)) {
+        //     for (let i = Number(valueSlider.current?.value); i > numbers.length; i--) {
+        //         add();
+        //     }
+        // } else {
+        //     for (let i = Number(valueSlider.current?.value); i < numbers.length; i++) {
+        //         remove();
+        //     }
+        // }
     }
 
     // useEffect(() => {
@@ -109,7 +147,7 @@ export default function Scene() {
                     [numbersCache[j], numbersCache[j + 1]] = [numbersCache[j + 1], numbersCache[j]];
                     setNumbers([...numbersCache]);
                     swapped = true;
-                    await delay(800);
+                    await delay(sortingSpeed);
                 }
             }
             if (!swapped) break;
@@ -137,7 +175,7 @@ export default function Scene() {
                 setSwappedNum([numbersCache[i], numbersCache[smallestNumIndex]]);
                 [numbersCache[i], numbersCache[smallestNumIndex]] = [numbersCache[smallestNumIndex], numbersCache[i]];
                 setNumbers([...numbersCache]);
-                await delay(800);
+                await delay(sortingSpeed);
             }
         }
         await delay(400);
@@ -156,13 +194,13 @@ export default function Scene() {
                     setChosenNum(j - 1);
                     [numbersCache[j], numbersCache[j - 1]] = [numbersCache[j - 1], numbersCache[j]];
                     setNumbers([...numbersCache]);
-                    await delay(800);
+                    await delay(sortingSpeed);
                 } else {
                     break;
                 }
             }
         }
-        await delay(500);
+        await delay(400);
         setLastNum([...numbersCache]);
         setChosenNum(-1);
         finishedSort(); // inspired by https://sortvisualizer.com/insertionsort/
@@ -173,7 +211,7 @@ export default function Scene() {
 
         for (let i = 0; i <= numbersCache.length - 1; i++) {
             setFinishNum(i);
-            await delay(200);
+            await delay(100);
         }
         setFinishNum(-1);
     }
@@ -198,15 +236,20 @@ export default function Scene() {
 
             const distance = position - mesh.current.position.x
 
-            mesh.current.position.x += distance * delta * 4
+            mesh.current.position.x += distance * delta * (isShuffling ? (12 - (shufflingSpeed / 100)) : (13 - (sortingSpeed / 100)))
 
             // https://r3f.docs.pmnd.rs/api/hooks#selector
             if (numbers.length > 7) {
                 state.camera.position.z += (numbers.length * 2 - state.camera.position.z /* oh god was that painful */) * delta * (3 /*slower?*/) // like above?
                 state.camera.position.y += ((numbers.length - (numbers.length * (1 / 6))) - state.camera.position.y) * delta * 3
             } else {
-                state.camera.position.z == 15;
-                state.camera.position.y == 5;
+                // console.log("weee")
+                // state.camera.position.z == 15;
+                // state.camera.position.y == 5;
+
+                // this one works if I change the value too suddenly (slider) 
+                state.camera.position.z += (15 - state.camera.position.z) * delta * (3)
+                state.camera.position.y += ((5 - (numbers.length * (1 / 6))) - state.camera.position.y) * delta * 3
             }
             state.camera.lookAt(0, 0, 0);
         })
@@ -231,6 +274,7 @@ export default function Scene() {
                 <button onClick={shuffle} style={{ padding: "10px", cursor: "pointer" }}>Shuffle</button>
                 <button onClick={add} style={{ padding: "10px", cursor: "pointer" }}>Add Number</button>
                 <button onClick={remove} style={{ padding: "10px", cursor: "pointer" }}>Remove Number</button>
+                <input type="range" min="2" max="100" defaultValue="7" onChange={(e) => updateValue(Number(e.target.value))} ref={valueSlider} />
             </div>
 
             <Canvas

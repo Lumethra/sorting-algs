@@ -236,7 +236,9 @@ export default function Scene() {
     async function finishedSort() {
         let numbersCache = [...numbers];
 
+        if (!isSortingRef.current) return;
         for (let i = 0; i <= numbersCache.length - 1; i++) {
+            if (!isSortingRef.current) return;
             setFinishNum(i);
             await delay(100);
         }

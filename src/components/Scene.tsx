@@ -76,10 +76,10 @@ export default function Scene() {
                 [numbersCache[i], numbersCache[randomPos]] = [numbersCache[randomPos], numbersCache[i]];
                 setNumbers([...numbersCache]);
                 await delay(shufflingSpeed);
-                if (numbersCache.length = 2) break;
+                if (numbersCache.length == 2) break;
             }
             if (numbersCache.length > 10) break;
-            if (numbersCache.length = 2) break;
+            if (numbersCache.length == 2) break;
         }
         await delay(400);
         setSwappedNum([]);

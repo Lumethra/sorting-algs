@@ -32,16 +32,23 @@ export default function Scene() {
 
     const valueSlider = useRef<HTMLInputElement>(null)
     const numberControls = useRef<HTMLInputElement>(null)
+    const isSortingRef = useRef(false); // somehow need a ref or else not working, maybe because of async? 
 
     const sort = () => {
         if (shuffling) return
-        if (sorting) return
+        if (sorting) {
+            setSorting(false);
+            isSortingRef.current = false;
+        } else {
 
-        const functions = [bubbleSort, selectionSort, insertionSort];
-        // bubbleSort();
-        // selectionSort();
-        // insertionSort();
-        functions[sortingFunction]();
+            const functions = [bubbleSort, selectionSort, insertionSort];
+            // bubbleSort();
+            // selectionSort();
+            // insertionSort();
+            functions[sortingFunction]();
+            setSorting(true);
+            isSortingRef.current = true;
+        }
     }
 
     const shuffle = async () => {
@@ -150,7 +157,6 @@ export default function Scene() {
         let swapped = false;
         let numbersCache = [...numbers];
 
-        setSorting(true);
         for (let i = 0; i < numbersCache.length - 1; i++) {
             swapped = false;
             for (let j = 0; j < numbersCache.length - i - 1; j++) {
@@ -174,7 +180,6 @@ export default function Scene() {
     async function selectionSort() {
         let numbersCache = [...numbers];
 
-        setSorting(true);
         for (let i = 0; i < numbersCache.length - 1; i++) {
             let smallestNumIndex = i;
 
@@ -201,7 +206,6 @@ export default function Scene() {
     async function insertionSort() {
         let numbersCache = [...numbers];
 
-        setSorting(true);
         for (let i = 0; i <= numbersCache.length - 1; i++) {
             for (let j = i; j > 0; j--) {
                 if (numbersCache[j] < numbersCache[j - 1]) {
@@ -230,6 +234,7 @@ export default function Scene() {
         }
         setFinishNum(-1);
         setSorting(false);
+        isSortingRef.current = false;
     }
 
     // function updateCam() {                          // https://discourse.threejs.org/t/using-r3f-to-update-camera-rotation-lookat-value/67734

@@ -203,6 +203,7 @@ export default function Scene() {
                 await delay(sortingSpeed);
             }
         }
+
         await delay(400);
         setLastNum([...numbersCache]);
         setSwappedNum([]);
@@ -227,6 +228,7 @@ export default function Scene() {
                 }
             }
         }
+
         await delay(400);
         setLastNum([...numbersCache]);
         setChosenNum(-1);

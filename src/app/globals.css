@@ -85,3 +85,78 @@ a {
 #slider::-webkit-slider-thumb:hover {
   height: 35px;
 }
+
+.material-symbols-outlined {
+  border-radius: 7px;
+  background-color: #272727;
+  font-size: 40px !important;
+  transition: 0.2s;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
+}
+
+button {
+  transition: 0.2s;
+  border: none;
+}
+
+button:hover {
+  font-size: 50px !important;
+}
+
+
+/* https://www.w3schools.com/howto/howto_css_tooltip.asp */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  /* width: 140px; */
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+
+  position: absolute;
+  z-index: 100;
+  top: 135%;
+  left: 50%;
+  transform: translateX(-50%);
+
+  font-family: sans-serif !important;
+  font-size: 17px;
+  font-weight: bold;
+  text-transform: none;
+  letter-spacing: normal;
+
+  /* Fade in */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #555 transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}

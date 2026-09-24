@@ -24,6 +24,7 @@ export default function Scene() {
     const [finishNum, setFinishNum] = useState<number>();
     const [sorting, setSorting] = useState<boolean>(false);
     const [shuffling, setShuffling] = useState<boolean>(false);
+    const [showMenu, setShowMenu] = useState<boolean>(false);
     const [showNumCtrl, setShowNumCTRL] = useState<boolean>(false);
     const [sortingSpeed, setSortingSpeed] = useState<number>(800);
     const [shufflingSpeed, setShufflingSpeed] = useState<number>(600);
@@ -68,8 +69,10 @@ export default function Scene() {
                 [numbersCache[i], numbersCache[randomPos]] = [numbersCache[randomPos], numbersCache[i]];
                 setNumbers([...numbersCache]);
                 await delay(shufflingSpeed);
+                if (numbersCache.length = 2) break;
             }
             if (numbersCache.length > 10) break;
+            if (numbersCache.length = 2) break;
         }
         await delay(400);
         setSwappedNum([]);
@@ -282,25 +285,64 @@ export default function Scene() {
 
     return (
         <div style={{ width: "100vw", height: "100vh", background: "black" }}>
-            <div style={{ position: "absolute", width: "calc(100vw - 40px)", top: 20, right: 20, zIndex: 10, display: "flex", gap: "10px", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ position: "absolute", width: "calc(100vw - 70px)", height: "69.25px", top: 30, right: 35, zIndex: 10, display: "flex", gap: "10px", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ display: "flex", gap: "10px", justifyContent: "center", alignItems: "center" }}>
-                    <select style={{ padding: "10px" }} onChange={(e) => { setSortingFunction(Number(e.target.value)) }}>
+                    {/* <select style={{ padding: "10px" }} onChange={(e) => { setSortingFunction(Number(e.target.value)) }}>
                         <option value={0}>Bubble Sort</option>
                         <option value={1}>Selection Sort</option>
                         <option value={2}>Insertion Sort</option>
-                    </select>
+                    </select> */}
+                    <button onClick={() => { setShowMenu(!showMenu) }} className="material-symbols-outlined" style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "10px", cursor: "pointer" }}>
+                        sort
+                    </button>
+                    <div style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", transition: "0.2s" }} >
+                        <button title="Bubble Sort" onClick={() => { setSortingFunction(0) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", transition: "0.2s" }} >
+                            <div className="tooltip">
+                                bubble_chart
+                                <span className="tooltiptext">Bubble Sort</span>
+                            </div>
+                        </button>
+                        <button onClick={() => { setSortingFunction(1) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", transition: "0.2s" }} >
+                            <div className="tooltip">
+                                select
+                                <span className="tooltiptext">Selection Sort</span>
+                            </div>
+                        </button>
+                        <button onClick={() => { setSortingFunction(2) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", transition: "0.2s" }} >
+                            <div className="tooltip">
+                                text_select_move_back_character
+                                <span className="tooltiptext">Insertion Sort</span>
+                            </div>
+                        </button>
+                    </div>
                 </div>
                 <div style={{ display: "flex", gap: "10px", justifyContent: "center", alignItems: "center" }}>
-                    <button onClick={sort} style={{ padding: "10px", cursor: "pointer" }}>Sort</button>
-                    <button onClick={shuffle} style={{ padding: "10px", cursor: "pointer" }}>Shuffle</button>
+                    <button onClick={sort} className="material-symbols-outlined" disabled={shuffling} style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "10px", cursor: "pointer" }}>
+                        <div className="tooltip">
+                            {sorting ? "pause" : shuffling ? "play_disabled" : "play_arrow"}
+                            <span className="tooltiptext">Sort</span>
+                        </div>
+                    </button>
+                    <button onClick={shuffle} className="material-symbols-outlined" disabled={sorting} style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "10px", cursor: "pointer" }}>
+                        <div className="tooltip">
+                            {sorting ? "block" : "shuffle"}
+                            <span className="tooltiptext">Shuffle</span>
+                        </div>
+                    </button>
                     <input id="slider" type="range" min="2" max="100" defaultValue="7" onChange={(e) => updateValue(Number(e.target.value))} ref={valueSlider} />
                 </div>
-            </div>
-            <div style={{ position: "absolute", width: "calc(100vw - 40px)", bottom: 20, right: 20, zIndex: 10, display: "flex", gap: "10px", justifyContent: "center", alignItems: "center" }}>
-                <button onClick={add} style={{ padding: "10px", cursor: "pointer", display: showNumCtrl ? "block" : "none" }}>Add Number</button>
-                <button onClick={remove} style={{ padding: "10px", cursor: "pointer", display: showNumCtrl ? "block" : "none" }}>Remove Number</button>
-                <input id="slider" type="range" min="100" max="1000" defaultValue="800" style={{ display: showNumCtrl ? "block" : "none" }} onChange={(e) => setSortingSpeed(Number(e.target.value))} ref={valueSlider} />
-                <input id="slider" type="range" min="100" max="1000" defaultValue="600" style={{ display: showNumCtrl ? "block" : "none" }} onChange={(e) => setShufflingSpeed(Number(e.target.value))} ref={valueSlider} />
+            </div >
+            <div style={{ position: "absolute", width: "calc(100vw - 40px)", bottom: 25, right: 20, zIndex: 10, display: "flex", gap: "10px", justifyContent: "center", alignItems: "center" }}>
+                {/* <button onClick={add} style={{ padding: "10px", cursor: "pointer", display: showNumCtrl ? "block" : "none" }}>Add Number</button> */}
+                {/* <button onClick={remove} style={{ padding: "10px", cursor: "pointer", display: showNumCtrl ? "block" : "none" }}>Remove Number</button> */}
+                <span>
+                    <label htmlFor="slider" style={{ display: showNumCtrl ? "block" : "none", paddingBottom: "15px" }}>Sorting Speed</label>
+                    <input id="slider" type="range" min="100" max="1000" defaultValue="800" style={{ display: showNumCtrl ? "block" : "none" }} onChange={(e) => setSortingSpeed(Number(e.target.value))} ref={valueSlider} />
+                </span>
+                <span>
+                    <label htmlFor="slider" style={{ display: showNumCtrl ? "block" : "none", paddingBottom: "15px" }}>Shuffling Speed</label>
+                    <input id="slider" type="range" min="100" max="1000" defaultValue="600" style={{ display: showNumCtrl ? "block" : "none" }} onChange={(e) => setShufflingSpeed(Number(e.target.value))} ref={valueSlider} />
+                </span>
             </div>
             <input type="checkbox" style={{ position: "absolute", bottom: 5, right: 5, zIndex: 10, width: "50px", height: "50px", WebkitAppearance: "none", MozAppearance: "none", appearance: "none" }} ref={numberControls} onChange={(e) => setShowNumCTRL(e.target.checked)} />
 
@@ -323,6 +365,6 @@ export default function Scene() {
                     })}
                 </group>
             </Canvas>
-        </div>
+        </div >
     )
 }

@@ -28,7 +28,7 @@ export default function Scene() {
     const [showNumCtrl, setShowNumCTRL] = useState<boolean>(false);
     const [sortingSpeed, setSortingSpeed] = useState<number>(800);
     const [shufflingSpeed, setShufflingSpeed] = useState<number>(600);
-    const [sortingFunction, setSortingFunction] = useState<number>(2);
+    const [sortingFunction, setSortingFunction] = useState<number>(0);
 
     const valueSlider = useRef<HTMLInputElement>(null)
     const numberControls = useRef<HTMLInputElement>(null)
@@ -39,15 +39,16 @@ export default function Scene() {
         if (sorting) {
             setSorting(false);
             isSortingRef.current = false;
+            setLastNum([...numbers]);
         } else {
 
             const functions = [bubbleSort, selectionSort, insertionSort];
             // bubbleSort();
             // selectionSort();
             // insertionSort();
-            functions[sortingFunction]();
             setSorting(true);
             isSortingRef.current = true;
+            functions[sortingFunction]();
         }
     }
 
@@ -160,7 +161,9 @@ export default function Scene() {
         for (let i = 0; i < numbersCache.length - 1; i++) {
             swapped = false;
             for (let j = 0; j < numbersCache.length - i - 1; j++) {
+                if (!isSortingRef.current) break;
                 if (numbersCache[j] > numbersCache[j + 1]) {
+                    if (!isSortingRef.current) break;
                     setLastNum([...numbersCache]);
                     setChosenNum(j + 1);
                     [numbersCache[j], numbersCache[j + 1]] = [numbersCache[j + 1], numbersCache[j]];
@@ -171,19 +174,22 @@ export default function Scene() {
             }
             if (!swapped) break;
         }
+
         await delay(400);
         setLastNum([...numbersCache]);
         setChosenNum(-1);
-        finishedSort();
+        if (isSortingRef.current) finishedSort();
     }
 
     async function selectionSort() {
         let numbersCache = [...numbers];
 
         for (let i = 0; i < numbersCache.length - 1; i++) {
+            if (!isSortingRef.current) break;
             let smallestNumIndex = i;
 
             for (let j = i + 1; j <= numbersCache.length - 1; j++) {
+                if (!isSortingRef.current) break;
                 if (numbersCache[j] < numbersCache[smallestNumIndex]) {
                     smallestNumIndex = j;
                 }
@@ -200,14 +206,16 @@ export default function Scene() {
         await delay(400);
         setLastNum([...numbersCache]);
         setSwappedNum([]);
-        finishedSort();
+        if (isSortingRef.current) finishedSort();
     }
 
     async function insertionSort() {
         let numbersCache = [...numbers];
 
         for (let i = 0; i <= numbersCache.length - 1; i++) {
+            if (!isSortingRef.current) break;
             for (let j = i; j > 0; j--) {
+                if (!isSortingRef.current) break;
                 if (numbersCache[j] < numbersCache[j - 1]) {
                     setLastNum([...numbersCache]);
                     setChosenNum(j - 1);
@@ -222,7 +230,7 @@ export default function Scene() {
         await delay(400);
         setLastNum([...numbersCache]);
         setChosenNum(-1);
-        finishedSort(); // inspired by https://sortvisualizer.com/insertionsort/
+        if (isSortingRef.current) finishedSort();       // inspired by https://sortvisualizer.com/insertionsort/
     }
 
     async function finishedSort() {
@@ -301,19 +309,19 @@ export default function Scene() {
                         sort
                     </button>
                     <div style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", transition: "0.2s" }} >
-                        <button title="Bubble Sort" onClick={() => { setSortingFunction(0) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", transition: "0.2s" }} >
+                        <button onClick={() => { setSortingFunction(0) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", border: sortingFunction == 0 ? "#7070709a 4px solid" : "none", transition: "0.2s" }} >
                             <div className="tooltip">
                                 bubble_chart
                                 <span className="tooltiptext">Bubble Sort</span>
                             </div>
                         </button>
-                        <button onClick={() => { setSortingFunction(1) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", transition: "0.2s" }} >
+                        <button onClick={() => { setSortingFunction(1) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", border: sortingFunction == 1 ? "#7070709a 4px solid" : "none", transition: "0.2s" }} >
                             <div className="tooltip">
                                 select
                                 <span className="tooltiptext">Selection Sort</span>
                             </div>
                         </button>
-                        <button onClick={() => { setSortingFunction(2) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", transition: "0.2s" }} >
+                        <button onClick={() => { setSortingFunction(2) }} disabled={shuffling || sorting} className="material-symbols-outlined sortingMethod" style={{ display: showMenu ? "flex" : "none", justifyContent: "center", alignItems: "center", padding: "10px", height: "60px", borderRadius: "7px", backgroundColor: "#272727", border: sortingFunction == 2 ? "#7070709a 4px solid" : "none", transition: "0.2s" }} >
                             <div className="tooltip">
                                 text_select_move_back_character
                                 <span className="tooltiptext">Insertion Sort</span>
@@ -325,7 +333,7 @@ export default function Scene() {
                     <button onClick={sort} className="material-symbols-outlined" disabled={shuffling} style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "10px", cursor: "pointer" }}>
                         <div className="tooltip">
                             {sorting ? "pause" : shuffling ? "play_disabled" : "play_arrow"}
-                            <span className="tooltiptext">Sort</span>
+                            <span className="tooltiptext">{sorting ? "Pause" : "Sort"}</span>
                         </div>
                     </button>
                     <button onClick={shuffle} className="material-symbols-outlined" disabled={sorting} style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "10px", cursor: "pointer" }}>
